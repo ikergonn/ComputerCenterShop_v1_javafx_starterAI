@@ -2,9 +2,11 @@ package dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 import model.Product;
@@ -24,8 +26,8 @@ public class ProductDaoImplJDBC implements ProductDao {
 
 		// TODO RA2-ISSUE-02: obrir la connexio amb DriverManager i guardar-la a conn.
 		// Pista: usa url, user i password, i comprova com es declara el connector al pom.xml.
-		throw pending("RA2-ISSUE-02 pendent: implementa la connexio JDBC amb DriverManager.");
-	}
+		conn = DriverManager.getConnection(url, user, password);	
+		}
 
 	@Override
 	public void disconnect() throws SQLException {
@@ -36,9 +38,43 @@ public class ProductDaoImplJDBC implements ProductDao {
 
 	@Override
 	public void initSchema() throws SQLException {
-		// TODO RA2-ISSUE-03: crear products, inventory_history i l'alias STOCK_ALERT_LIMIT.
-		// Pista: resol-ho amb Statement i try-with-resources, i afegeix seed inicial si la taula es buida.
-		throw pending("RA2-ISSUE-03 pendent: implementa DDL i inicialitzacio de l'esquema.");
+		// RA2-ISSUE-03: DDL de l'esquema relacional + alias + seed inicial.
+		try (Statement statement = requireConnection().createStatement()) {
+			statement.execute("CREATE TABLE IF NOT EXISTS products ("
+					+ "id IDENTITY PRIMARY KEY, "
+					+ "name VARCHAR(80) NOT NULL UNIQUE, "
+					+ "wholesaler_price DECIMAL(10,2) NOT NULL, "
+					+ "available BOOLEAN NOT NULL, "
+					+ "stock INT NOT NULL)");
+
+			statement.execute("CREATE TABLE IF NOT EXISTS inventory_history ("
+					+ "id IDENTITY PRIMARY KEY, "
+					+ "product_id BIGINT NOT NULL, "
+					+ "action VARCHAR(40) NOT NULL, "
+					+ "quantity INT NOT NULL, "
+					+ "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+					+ "FOREIGN KEY (product_id) REFERENCES products(id))");
+
+			statement.execute("CREATE ALIAS IF NOT EXISTS STOCK_ALERT_LIMIT FOR \""
+					+ ProductDaoImplJDBC.class.getName() + ".stockAlertLimit\"");
+
+			int totalProducts = 0;
+			try (ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM products")) {
+				if (resultSet.next()) {
+					totalProducts = resultSet.getInt(1);
+				}
+			}
+
+			if (totalProducts == 0) {
+				statement.executeUpdate("INSERT INTO products(name, wholesaler_price, available, stock) VALUES "
+						+ "('SSD 1TB', 60.00, TRUE, 8), "
+						+ "('RAM 32GB', 90.50, TRUE, 3), "
+						+ "('Teclat mecanic', 45.00, TRUE, 6)");
+				System.out.println("[initSchema] Esquema creat i seed inicial inserit (3 productes).");
+			} else {
+				System.out.println("[initSchema] Esquema ja existent (" + totalProducts + " productes), no es duplica el seed.");
+			}
+		}
 	}
 
 	@Override
@@ -55,8 +91,15 @@ public class ProductDaoImplJDBC implements ProductDao {
 
 	@Override
 	public int insertProduct(Product product) throws SQLException {
-		// TODO RA2-ISSUE-04: inserir name, wholesaler_price, available i stock amb PreparedStatement.
-		throw pending("RA2-ISSUE-04 pendent: implementa insercio amb PreparedStatement.");
+		// RA2-ISSUE-04: insercio parametritzada amb PreparedStatement.
+		String sql = "INSERT INTO products(name, wholesaler_price, available, stock) VALUES (?, ?, ?, ?)";
+		try (PreparedStatement preparedStatement = requireConnection().prepareStatement(sql)) {
+			preparedStatement.setString(1, product.getName());
+			preparedStatement.setDouble(2, product.getWholesalerPrice().getValue());
+			preparedStatement.setBoolean(3, product.isAvailable());
+			preparedStatement.setInt(4, product.getStock());
+			return preparedStatement.executeUpdate();
+		}
 	}
 
 	@Override
@@ -96,7 +139,6 @@ public class ProductDaoImplJDBC implements ProductDao {
 		return new SQLFeatureNotSupportedException(message);
 	}
 
-	@SuppressWarnings("unused")
 	private Connection requireConnection() throws SQLException {
 		if (conn == null || conn.isClosed()) {
 			throw new SQLException("Connexio no disponible. Revisa RA2-ISSUE-02.");
