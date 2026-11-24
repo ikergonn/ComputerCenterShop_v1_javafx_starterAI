@@ -47,6 +47,9 @@ public class ShopController {
 		stockColumn.setCellValueFactory(cell -> new ReadOnlyIntegerWrapper(cell.getValue().getStock()));
 		availableColumn.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().isAvailable() ? "Si" : "No"));
 
+		inventoryTable.setColumnResizePolicy(
+			    TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN
+			);
 		inventoryTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, selected) -> {
 			if (selected != null) {
 				nameField.setText(selected.getName());
