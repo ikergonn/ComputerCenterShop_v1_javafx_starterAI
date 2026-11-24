@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 import model.Product;
@@ -38,7 +39,36 @@ public class ProductDaoImplJDBC implements ProductDao {
 	public void initSchema() throws SQLException {
 		// TODO RA2-ISSUE-03: crear products, inventory_history i l'alias STOCK_ALERT_LIMIT.
 		// Pista: resol-ho amb Statement i try-with-resources, i afegeix seed inicial si la taula es buida.
-		throw pending("RA2-ISSUE-03 pendent: implementa DDL i inicialitzacio de l'esquema.");
+		try (Statement st = conn.createStatement()) {
+
+		    st.executeUpdate("CREATE TABLE IF NOT EXISTS products ("
+		            + "id IDENTITY PRIMARY KEY, "
+		            + "name VARCHAR(80) NOT NULL UNIQUE, "
+		            + "wholesaler_price DECIMAL(10,2) NOT NULL, "
+		            + "available BOOLEAN NOT NULL, "
+		            + "stock INT NOT NULL)");
+
+		    st.executeUpdate("CREATE TABLE IF NOT EXISTS inventory_history ("
+		            + "id IDENTITY PRIMARY KEY, "
+		            + "product_id BIGINT NOT NULL, "
+		            + "action VARCHAR(40) NOT NULL, "
+		            + "quantity INT NOT NULL, "
+		            + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+		            + "FOREIGN KEY (product_id) REFERENCES products(id))");
+
+		    st.executeUpdate("CREATE ALIAS IF NOT EXISTS STOCK_ALERT_LIMIT "
+		            + "FOR 'dao.ProductDaoImplJDBC.stockAlertLimit'");
+
+		    try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM products")) {
+		        if (rs.next() && rs.getInt(1) == 0) {
+		            st.executeUpdate("INSERT INTO products "
+		                    + "(name, wholesaler_price, available, stock) VALUES "
+		                    + "('SSD 1TB', 60.00, TRUE, 8), "
+		                    + "('RAM 32GB', 90.50, TRUE, 3), "
+		                    + "('Teclat mecanic', 45.00, TRUE, 6)");
+		        }
+		    }
+		}
 	}
 
 	@Override
