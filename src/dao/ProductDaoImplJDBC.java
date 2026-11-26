@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
@@ -104,14 +105,29 @@ public class ProductDaoImplJDBC implements ProductDao {
 
 	@Override
 	public int updateStock(String name, int newStock) throws SQLException {
-		// TODO RA2-ISSUE-05: actualitzar stock i available segons newStock amb PreparedStatement.
-		throw pending("RA2-ISSUE-05 pendent: implementa actualitzacio d'estoc.");
+		// RA2-ISSUE-05: actualitzar stock i available (true si l'estoc es major que zero).
+		String sql = "UPDATE products SET stock = ?, available = ? WHERE name = ?";
+		try (PreparedStatement preparedStatement = requireConnection().prepareStatement(sql)) {
+			preparedStatement.setInt(1, newStock);
+			preparedStatement.setBoolean(2, newStock > 0);
+			preparedStatement.setString(3, name);
+			return preparedStatement.executeUpdate();
+		}
 	}
 
 	@Override
 	public int deleteProduct(String name) throws SQLException {
-		// TODO RA2-ISSUE-06: eliminar per nom i comprovar files afectades.
-		throw pending("RA2-ISSUE-06 pendent: implementa eliminacio controlada.");
+		// RA2-ISSUE-06: eliminar per nom amb PreparedStatement i retornar files afectades.
+		String sql = "DELETE FROM products WHERE name = ?";
+		try (PreparedStatement preparedStatement = requireConnection().prepareStatement(sql)) {
+			preparedStatement.setString(1, name);
+			return preparedStatement.executeUpdate();
+		} catch (SQLIntegrityConstraintViolationException e) {
+			// La FK de inventory_history impedeix esborrar un producte amb historial associat.
+			throw new SQLException("No es pot eliminar '" + name + "': te moviments a inventory_history "
+					+ "(clau forana product_id). Cal conservar el producte o esborrar abans el seu historial.",
+					e.getSQLState(), e.getErrorCode(), e);
+		}
 	}
 
 	@Override
