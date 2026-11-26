@@ -41,15 +41,15 @@ Marqueu una tasca quan la prova i el rastre al repositori estiguin recollits. El
 
 ### M1 · Base JDBC operativa
 
-- [ ] [RA2-ISSUE-01 · Preparar el projecte JDBC](issues/RA2-ISSUE-01-preparar-projecte-jdbc.md)
-- [ ] [RA2-ISSUE-02 · Connector, URL i connexió](issues/RA2-ISSUE-02-revisar-connector-url-connexio.md)
-- [ ] [RA2-ISSUE-03 · Estructura relacional](issues/RA2-ISSUE-03-crear-estructura-relacional.md)
+- [x] [RA2-ISSUE-01 · Preparar el projecte JDBC](issues/RA2-ISSUE-01-preparar-projecte-jdbc.md)
+- [x] [RA2-ISSUE-02 · Connector, URL i connexió](issues/RA2-ISSUE-02-revisar-connector-url-connexio.md)
+- [x] [RA2-ISSUE-03 · Estructura relacional](issues/RA2-ISSUE-03-crear-estructura-relacional.md)
 
 ### M2 · Operacions relacionals principals
 
-- [ ] [RA2-ISSUE-04 · Inserció de dades](issues/RA2-ISSUE-04-inserir-producte-preparedstatement.md)
-- [ ] [RA2-ISSUE-05 · Actualització d'estoc](issues/RA2-ISSUE-05-actualitzar-estoc.md)
-- [ ] [RA2-ISSUE-06 · Eliminació controlada](issues/RA2-ISSUE-06-eliminar-producte-controlat.md)
+- [x] [RA2-ISSUE-04 · Inserció de dades](issues/RA2-ISSUE-04-inserir-producte-preparedstatement.md)
+- [x] [RA2-ISSUE-05 · Actualització d'estoc](issues/RA2-ISSUE-05-actualitzar-estoc.md)
+- [x] [RA2-ISSUE-06 · Eliminació controlada](issues/RA2-ISSUE-06-eliminar-producte-controlat.md)
 - [ ] [RA2-ISSUE-07 · Consultes i resultats](issues/RA2-ISSUE-07-consultar-inventari-resultset.md)
 
 ### M3 · Robustesa JDBC
@@ -68,19 +68,31 @@ Marqueu una tasca quan la prova i el rastre al repositori estiguin recollits. El
 
 Dupliqueu aquest bloc per a cada *issue* que completeu. Escriviu amb les vostres paraules i enllaceu només proves i *commits* del vostre repositori.
 
-### RA2-ISSUE-XX · [títol de l'*issue*]
+### RA2-ISSUE-01 · [Preparar projecte JDBC local]
 
-- Estat: **pendent | en curs | comprovat**
-- Persona que l'ha iniciat: **[nom]**
-- Problema inicial: **[què no funcionava o què faltava]**
-- Decisió aplicada: **[què heu decidit fer i per què]**
-- Canvis fets: **[fitxers o parts del projecte modificades]**
-- Prova realitzada: **[cas que heu provat i resultat observat]**
-- Evidència: **[enllaç a captura, registre, vídeo breu o apartat del repositori]**
-- *Commit* o *pull request*: **[enllaç o identificador]**
+- Estat: comprovat**
+- Persona que l'ha iniciat:[Iker]
+- Problema inicial: **[Calia comprovar que el projecte estigués preparat per treballar amb JDBC i H2.]**
+- Decisió aplicada: **[He decidit revisar la configuració del projecte abans de començar a implementar la connexió]**
+- Canvis fets: **[Hem revisat el fitxer pom.xml i la classe ProductDaoImplJDBC. No ha estat necessari modificar el codi.]**
+- Prova realitzada: **[Hem executat el projecte i hem comprovat que s'obre correctament la pantalla inicial.]**
+- Evidència: **[https://github.com/ikergonn/ComputerCenterShop_v1_javafx_starterAI/issues/1#issuecomment-7014236235]**
+- *Commit* o *pull request*: **[ ]**
 - Explicació individual: **[què pot explicar cada integrant sobre aquesta tasca]**
 - Ús d'IA, si n'hi ha hagut: **[consulta feta, ajuda rebuda i comprovació pròpia]**
 
+### RA2-ISSUE-02 · [Preparar projecte JDBC local]
+
+- - Estat: **comprovat**
+- Persona que l'ha iniciat: **[Iker]**
+- Problema inicial: **[El mètode connect() estava incomplet i no permetia connectar amb H2.]**
+- Decisió aplicada: **[Hem decidit utilitzar DriverManager per connectar amb la base de dades local.]**
+- Canvis fets: **[Hem modificat el mètode connect() de ProductDaoImplJDBC i hem guardat la connexió al camp conn, mantenint les propietats de sistema.]**
+- Prova realitzada: **[Hem executat el projecte i hem comprovat que ja no apareix l'error RA2-ISSUE-02 pendent.]**
+- Evidència: **[enllaç a captura, registre, vídeo breu o apartat del repositori]**
+- *Commit* o *pull request*: **[enllaç o identificador]**
+- Explicació individual: **[He utilitzat DriverManager.getConnection(url, user, password) per connectar amb H2.]**
+- Ús d'IA, si n'hi ha hagut: **[Hem utilitzat ChatGPT per resoldre dubtes sobre la connexió.]**
 ## Proves que hem de poder repetir
 
 | Cas que comprovem | Dades o condicions inicials | Resultat observat | Evidència |
